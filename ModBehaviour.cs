@@ -11,7 +11,7 @@ using TMPro;
 using UnityEngine;
 using SodaCraft.Localizations;
 
-namespace DisplayRequiredItemAndAmountByQuest
+namespace QuestItemRequirementsDisplay
 {
 
     public class ModBehaviour : Duckov.Modding.ModBehaviour
@@ -64,7 +64,7 @@ namespace DisplayRequiredItemAndAmountByQuest
             Text.gameObject.SetActive(true);
             Text.transform.SetParent(uiInstance.LayoutParent);
             Text.transform.localScale = Vector3.one;
-            Text.text = "\n";
+            Text.text = "";
             Text.fontSize = 20f;
 
             var currentLanguage = LocalizationManager.CurrentLanguage;
