@@ -6,6 +6,12 @@
 		<!-- 下面这行里填写你的鸭科夫安装路径，这样编译器就能找到相关的dll文件 -->
 		<DuckovPath>G:\GAME\steam\steamapps\common\Escape from Duckov</DuckovPath>
 	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+	  <DebugType>none</DebugType>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+	  <DebugType>none</DebugType>
+	</PropertyGroup>
 	<ItemGroup>
 		<Reference Include="$(DuckovPath)\Duckov_Data\Managed\TeamSoda.*" />
 		<Reference Include="$(DuckovPath)\Duckov_Data\Managed\ItemStatsSystem.dll" />
