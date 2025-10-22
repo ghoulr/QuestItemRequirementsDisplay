@@ -38,5 +38,5 @@ v0.2 - 修复了道具名中有数字时不能正常显示道具数量的bug
 v0.1 - 发布
 
 
-[Steam]https://steamcommunity.com/sharedfiles/filedetails/?id=3591517959
+[Steam](https://steamcommunity.com/sharedfiles/filedetails/?id=3591517959)
 v0.3 by ballban
