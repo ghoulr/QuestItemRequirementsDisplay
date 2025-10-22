@@ -1,15 +1,17 @@
-﻿using Duckov.Quests;
+﻿using ballban;
+using Duckov.Quests;
 using Duckov.Quests.Tasks;
 using Duckov.UI;
 using Duckov.Utilities;
 using ItemStatsSystem;
+using SodaCraft.Localizations;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using TMPro;
 using UnityEngine;
-using SodaCraft.Localizations;
+
 
 namespace QuestItemRequirementsDisplay
 {
@@ -67,69 +69,37 @@ namespace QuestItemRequirementsDisplay
             Text.text = "";
             Text.fontSize = 20f;
 
+            // Display quests that require this item
             var currentLanguage = LocalizationManager.CurrentLanguage;
-
-            var totalQuests = GameplayDataSettings.QuestCollection;
-            var questManager = QuestManager.Instance;
-            var finishedQuestsId = questManager.HistoryQuests.Select(q => q.ID);
-
-            // Quests that require this item to be prepared
-            var requiredQuests = new List<Quest>();
-            foreach (var quest in totalQuests)
-            {
-                // Skip if the quest is already completed
-                if (finishedQuestsId.Contains(quest.ID)) continue;
-
-                // If the quest requires not matching this item, skip it
-                if (quest.RequiredItemID == item.TypeID)
-                {
-                    requiredQuests.Add(quest);
-                }
-            }
-            if (requiredQuests.Count != 0)
+            var requiredQuests = Utility.GetRequiredQuests(item);
+            if (requiredQuests.Count > 0)
             {
                 var questDisplayNames = String.Join("\n\t", requiredQuests.Select(x => x.DisplayName));
                 switch (currentLanguage)
                 {
                     case SystemLanguage.Chinese:
                     case SystemLanguage.ChineseSimplified:
-                        Text.text += $"需要准备该物品的任务:\n\t{questDisplayNames}";
+                        Text.text += $"\n需要准备该物品的任务:";
                         break;
                     case SystemLanguage.ChineseTraditional:
-                        Text.text += $"需要準備該物品的任務:\n\t{questDisplayNames}";
+                        Text.text += $"\n需要準備該物品的任務:";
                         break;
                     case SystemLanguage.Japanese:
-                        Text.text += $"このアイテムが必要なクエスト:\n\t{questDisplayNames}";
+                        Text.text += $"\nこのアイテムが必要なクエスト:";
                         break;
                     case SystemLanguage.Korean:
-                        Text.text += $"이아이템이 필요한 퀘스트:\n\t{questDisplayNames}";
+                        Text.text += $"\n이아이템이 필요한 퀘스트:";
                         break;
                     default:
-                        Text.text += $"Quests required this item:\n\t{questDisplayNames}";
+                        Text.text += $"\nQuests required this item:";
                         break;
                 }
+                Text.text += $"\n\t{questDisplayNames}";
             }
 
-            // Quests that require submitting item
-            var submitItemsDir = new Dictionary<SubmitItems, string>();
-            foreach (Quest quest in totalQuests)
-            {
-                // Skip if the quest is already completed
-                if (finishedQuestsId.Contains(quest.ID)) continue;
-                if (quest.Tasks == null) continue;
-
-                foreach (var task in quest.Tasks)
-                {
-                    // If the task is a SubmitItems task and unfinished and matches the item type ID
-                    if (task is SubmitItems submitItems && !submitItems.IsFinished() && submitItems.ItemTypeID == item.TypeID)
-                    {
-                        submitItemsDir.Add(submitItems, submitItems.Description);
-                    }
-                }
-            }
-
-            var count = 0;
-            if (submitItemsDir.Count > 0)
+            // Display quests that require submitting this item
+            var requiredSubmitItems = Utility.GetRequiredSubmitItems(item);
+            if (requiredSubmitItems.Count > 0)
             {
                 switch (currentLanguage)
                 {
@@ -150,23 +120,39 @@ namespace QuestItemRequirementsDisplay
                         Text.text += "\nQuests required submit this item:";
                         break;
                 }
-            }
-            foreach (var kvp in submitItemsDir)
-            {
-                var submitItems = kvp.Key;
-                var description = kvp.Value;
-
-                var match = Regex.Match(description, @"(\d+)[^\d]+\d+\s?$");
-                if (match.Success)
+                foreach (var kv in requiredSubmitItems)
                 {
-                    var countStr = match.Groups[1].Value;
-                    count += int.TryParse(countStr, out var c) ? c : 0;
-                    // Text.text += $"\n{description}";
-                    Text.text += $"\n\t{countStr}  -  {submitItems.Master.DisplayName}";
+                    Text.text += $"\n\t{kv.Value}  -  {kv.Key.Master.DisplayName}";
                 }
-                else
+
+            }
+
+            // Display perks that require this item
+            var requiredPerkEntries = Utility.GetRequiredPerkEntries(item);
+            if (requiredPerkEntries.Count > 0)
+            {
+                switch (currentLanguage)
                 {
-                    Text.text += $"\nregex err. {description}";
+                    case SystemLanguage.Chinese:
+                    case SystemLanguage.ChineseSimplified:
+                        Text.text += "\n需要该物品解锁的天赋:";
+                        break;
+                    case SystemLanguage.ChineseTraditional:
+                        Text.text += "\n需要該物品解鎖的天賦:";
+                        break;
+                    case SystemLanguage.Japanese:
+                        Text.text += "\nこのアイテムが必要なスキル:";
+                        break;
+                    case SystemLanguage.Korean:
+                        Text.text += "\n이아이템이 필요한 스킬:";
+                        break;
+                    default:
+                        Text.text += "\nPerks required this item:";
+                        break;
+                }
+                foreach (var entry in requiredPerkEntries)
+                {
+                    Text.text += $"\n\t{entry.Amount}  -  {entry.PerkTreeName}/{entry.PerkName}";
                 }
             }
         }
