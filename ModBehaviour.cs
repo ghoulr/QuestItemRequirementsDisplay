@@ -161,7 +161,7 @@ namespace QuestItemRequirementsDisplay
                 {
                     var countStr = match.Groups[1].Value;
                     count += int.TryParse(countStr, out var c) ? c : 0;
-                    Text.text += $"\n{description}";
+                    // Text.text += $"\n{description}";
                     Text.text += $"\n\t{countStr}  -  {submitItems.Master.DisplayName}";
                 }
                 else
