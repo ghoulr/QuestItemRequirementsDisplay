@@ -28,6 +28,33 @@ namespace ballban
             return totalQuests;
         }
 
+        public struct RequiredBuilding
+        {
+            public long Amount;
+            public string BuildingName;
+        }
+
+        /// <summary>
+        /// Get a list of buildings that require the specified item to unlock.
+        /// WARNING: not UNLOCKED, but UNPLACED buildings
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns></returns>
+        public static List<RequiredBuilding> GetRequiredBuildings(Item item)
+        {
+            return BuildingDataCollection.Instance.Infos
+                .Where(info =>
+                    info.CurrentAmount == 0 && !IsTestingDisplayName(info.DisplayName))
+                .SelectMany(info => info.cost.items
+                    .Where(itemEntry => itemEntry.id == item.TypeID)
+                    .Select(itemEntry => new RequiredBuilding
+                    {
+                        Amount = itemEntry.amount,
+                        BuildingName = info.DisplayName
+                    })
+                ).ToList();
+        }
+
         public struct RequiredPerk
         {
             public long Amount;
