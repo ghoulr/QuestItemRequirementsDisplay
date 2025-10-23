@@ -1,6 +1,7 @@
 ﻿using Duckov.Quests;
 using Duckov.Quests.Tasks;
 using Duckov.Utilities;
+using Duckov.Buildings;
 using ItemStatsSystem;
 using System;
 using System.Collections.Generic;
@@ -12,8 +13,20 @@ namespace ballban
 {
     static public class Utility
     {
-        public static QuestCollection TotalQuests = GameplayDataSettings.QuestCollection;
+        public static List<Quest> TotalQuests = InitTotalQuests();
         public static QuestManager QuestMangaer = QuestManager.Instance;
+
+        private static List<Quest> InitTotalQuests()
+        {
+            var totalQuests = new List<Quest>(GameplayDataSettings.QuestCollection.Count);
+            foreach (var quest in GameplayDataSettings.QuestCollection)
+            {
+                if (IsTestingDisplayName(quest.DisplayName)) continue;
+                totalQuests.Add(quest);
+            }
+
+            return totalQuests;
+        }
 
         public struct RequiredPerk
         {
@@ -106,6 +119,11 @@ namespace ballban
             }
 
             return requiredSubmitItems;
+        }
+
+        private static bool IsTestingDisplayName(string name)
+        {
+            return name.StartsWith("*") && name.EndsWith("*");
         }
     }
 }
