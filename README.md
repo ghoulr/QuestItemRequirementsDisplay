@@ -1,15 +1,19 @@
-## About this mod / mod介绍
+## 使用说明 / How to use
+Steam玩家直接进入[Steam创意工坊]https://steamcommunity.com/sharedfiles/filedetails/?id=3591517959订阅即可
+非Steam玩家把"QuestItemRequirementsDisplay"这个文件夹直接放到"Escape from Duckov\Duckov_Data\Mods\"目录下即可
+
+Steam players can simply subscribe to the mod on the [Steam Workshop]https://steamcommunity.com/sharedfiles/filedetails/?id=3591517959.
+Non-Steam players can place the "QuestItemRequirementsDisplay" folder directly into the "Escape from Duckov\Duckov_Data\Mods" directory.
+
+
+## mod介绍 / About this mod
 这个mod可以在道具上显示当前你未完成任务, 未解锁的天赋, 未建造的建筑里需要的该道具的任务名和数量
 (注意其中有一些任务可能是测试用的, 或者是期间限定解锁的, 或者是数据里有了但是玩家还不能解锁的都会显示出来!)
+支持简体中文, 繁体中文, 英语, 韩语, 日语
 
 This mod can display the names and required quantities of unfinished quests, locked perks, and unbuilt buildings that need the current item.
 (Note: Some entries may be for testing, time-limited unlocks, or exist in the data but are not yet available to players—all will be shown!)
-
-このMODは、アイテム上に、未完了のクエスト、未解除のパーク、未建造の建物で必要なアイテム数を表示します。
-（注意：一部はテスト用、期間限定解除、またはデータ上に存在するがプレイヤーがまだ解除できないものも含まれ、すべて表示されます！）
-
-이 모드는 현재 아이템이 필요한 미완료 퀘스트, 잠금 해제되지 않은 특성, 건설되지 않은 건물의 이름과 필요한 수량을 아이템에 표시할 수 있습니다.
-(참고: 일부는 테스트용, 기간 한정 해제, 또는 데이터에는 있지만 아직 플레이어가 해제할 수 없는 항목도 모두 표시됩니다!)
+Supports Simplified Chinese, Traditional Chinese, English, Korean, and Japanese.
 
 
 ## To do / 待更新事项

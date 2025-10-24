@@ -18,4 +18,7 @@
 		<Reference Include="$(DuckovPath)\Duckov_Data\Managed\Unity*" />
 		<Reference Include="$(DuckovPath)\Duckov_Data\Managed\SodaLocalization.dll" />
 	</ItemGroup>
+	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
+	  <Exec Command="copy /Y &quot;$(TargetPath)&quot; &quot;$(SolutionDir)QuestItemRequirementsDisplay\&quot;" />
+	</Target>
 </Project>

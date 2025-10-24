@@ -14,6 +14,10 @@ namespace ballban
     {
         public static List<Quest> TotalQuests = InitTotalQuests();
 
+        /// <summary>
+        /// Initialize the total quests list, excluding testing quests.
+        /// </summary>
+        /// <returns></returns>
         private static List<Quest> InitTotalQuests()
         {
             var totalQuests = new List<Quest>(GameplayDataSettings.QuestCollection.Count);
