@@ -5,6 +5,7 @@ using ItemStatsSystem;
 using SodaCraft.Localizations;
 using System;
 using System.Linq;
+using System.Reflection;
 using TMPro;
 using UnityEngine;
 
@@ -59,14 +60,32 @@ namespace QuestItemRequirementsDisplay
                 return;
             }
 
+            // Setup the text UI
             Text.gameObject.SetActive(true);
             Text.transform.SetParent(uiInstance.LayoutParent);
             Text.transform.localScale = Vector3.one;
             Text.text = "";
             Text.fontSize = 20f;
 
-            // Display quests that require this item
+            // Get the current language
             var currentLanguage = LocalizationManager.CurrentLanguage;
+
+            // Append required item information
+            Text.text += GetRequiredQuestText(item, currentLanguage);
+            Text.text += GetRequiredSubmittingQuestText(item, currentLanguage);
+            Text.text += GetRequiredPerkText(item, currentLanguage);
+            Text.text += GetRequiredBuildingText(item, currentLanguage);
+        }
+
+        /// <summary>
+        /// Get the display text for quests that require the given item.
+        /// </summary>
+        /// <param name="item"></param>
+        /// <param name="currentLanguage"></param>
+        /// <returns></returns>
+        string GetRequiredQuestText(Item item, SystemLanguage currentLanguage)
+        {
+            var text = string.Empty;
             var requiredQuests = Utility.GetRequiredQuests(item);
             if (requiredQuests.Count > 0)
             {
@@ -75,121 +94,79 @@ namespace QuestItemRequirementsDisplay
 #else
                 var questDisplayNames = String.Join("\n\t", requiredQuests.Select(x => x.DisplayName));
 #endif
-                switch (currentLanguage)
-                {
-                    case SystemLanguage.Chinese:
-                    case SystemLanguage.ChineseSimplified:
-                        Text.text += $"\n需要准备该物品的任务:";
-                        break;
-                    case SystemLanguage.ChineseTraditional:
-                        Text.text += $"\n需要準備該物品的任務:";
-                        break;
-                    case SystemLanguage.Japanese:
-                        Text.text += $"\nこのアイテムが必要なクエスト:";
-                        break;
-                    case SystemLanguage.Korean:
-                        Text.text += $"\n이아이템이 필요한 퀘스트:";
-                        break;
-                    default:
-                        Text.text += $"\nQuests required this item:";
-                        break;
-                }
-                Text.text += $"\n\t{questDisplayNames}";
+                text += LocalizedText.Get(MethodBase.GetCurrentMethod().Name, currentLanguage);
+                text += $"\n\t{questDisplayNames}";
             }
+            return text;
+        }
 
-            // Display quests that require submitting this item
+        /// <summary>
+        /// Get the display text for quests that require submitting the given item.
+        /// </summary>
+        /// <param name="item"></param>
+        /// <param name="currentLanguage"></param>
+        /// <returns></returns>
+        string GetRequiredSubmittingQuestText(Item item, SystemLanguage currentLanguage)
+        {
+            var text = string.Empty;
             var requiredSubmitItems = Utility.GetRequiredSubmitItems(item);
             if (requiredSubmitItems.Count > 0)
             {
-                switch (currentLanguage)
-                {
-                    case SystemLanguage.Chinese:
-                    case SystemLanguage.ChineseSimplified:
-                        Text.text += "\n需要提交该物品的任务:";
-                        break;
-                    case SystemLanguage.ChineseTraditional:
-                        Text.text += "\n需要提交該物品的任務:";
-                        break;
-                    case SystemLanguage.Japanese:
-                        Text.text += "\nこのアイテム納品が必要なクエスト:";
-                        break;
-                    case SystemLanguage.Korean:
-                        Text.text += "\n이아이템 재출이 필요한 퀘스트:";
-                        break;
-                    default:
-                        Text.text += "\nQuests required submit this item:";
-                        break;
-                }
+                text += LocalizedText.Get(MethodBase.GetCurrentMethod().Name, currentLanguage);
                 foreach (var kv in requiredSubmitItems)
                 {
-                    Text.text += $"\n\t{kv.Value}  -  {kv.Key.Master.DisplayName}";
+                    text += $"\n\t{kv.Value}  -  {kv.Key.Master.DisplayName}";
 #if DEBUG
-                    Text.text += $"- isActiveAndEnabled: {kv.Key.Master.isActiveAndEnabled}, enabled: {kv.Key.Master.enabled}";
+                    text += $"- isActiveAndEnabled: {kv.Key.Master.isActiveAndEnabled}, enabled: {kv.Key.Master.enabled}";
 #endif
                 }
-
             }
+            return text;
+        }
 
-            // Display perks that require this item
+        /// <summary>
+        /// Get the display text for perks that require the given item.
+        /// </summary>
+        /// <param name="item"></param>
+        /// <param name="currentLanguage"></param>
+        /// <returns></returns>
+        string GetRequiredPerkText(Item item, SystemLanguage currentLanguage)
+        {
+            var text = string.Empty;
             var requiredPerkEntries = Utility.GetRequiredPerkEntries(item);
             if (requiredPerkEntries.Count > 0)
             {
-                switch (currentLanguage)
-                {
-                    case SystemLanguage.Chinese:
-                    case SystemLanguage.ChineseSimplified:
-                        Text.text += "\n需要该物品解锁的天赋:";
-                        break;
-                    case SystemLanguage.ChineseTraditional:
-                        Text.text += "\n需要該物品解鎖的天賦:";
-                        break;
-                    case SystemLanguage.Japanese:
-                        Text.text += "\nこのアイテムが必要なスキル:";
-                        break;
-                    case SystemLanguage.Korean:
-                        Text.text += "\n이아이템이 필요한 스킬:";
-                        break;
-                    default:
-                        Text.text += "\nPerks required this item:";
-                        break;
-                }
+                text += LocalizedText.Get(MethodBase.GetCurrentMethod().Name, currentLanguage);
                 foreach (var entry in requiredPerkEntries)
                 {
-                    Text.text += $"\n\t{entry.Amount}  -  {entry.PerkTreeName}/{entry.PerkName}";
+                    text += $"\n\t{entry.Amount}  -  {entry.PerkTreeName}/{entry.PerkName}";
 #if DEBUG
-                    Text.text += $"- {entry.Test}";
+                    text += $"- {entry.Test}";
 #endif
                 }
             }
+            return text;
+        }
 
-            // Display buildings that require this item
+        /// <summary>
+        /// Get the display text for buildings that require the given item.
+        /// </summary>
+        /// <param name="item"></param>
+        /// <param name="currentLanguage"></param>
+        /// <returns></returns>
+        string GetRequiredBuildingText(Item item, SystemLanguage currentLanguage)
+        {
+            var text = string.Empty;
             var requiredBuildings = Utility.GetRequiredBuildings(item);
             if (requiredBuildings.Count > 0)
             {
-                switch (currentLanguage)
-                {
-                    case SystemLanguage.Chinese:
-                    case SystemLanguage.ChineseSimplified:
-                        Text.text += "\n需要该物品解锁的建筑:";
-                        break;
-                    case SystemLanguage.ChineseTraditional:
-                        Text.text += "\n需要該物品解鎖的建築:";
-                        break;
-                    case SystemLanguage.Japanese:
-                        Text.text += "\nこのアイテムが必要な建物:";
-                        break;
-                    case SystemLanguage.Korean:
-                        Text.text += "\n이 아이템이 필요한 건물:";
-                        break;
-                    default:
-                        Text.text += "\nBuildings required this item:";
-                        break;
-                }
+                text += LocalizedText.Get(MethodBase.GetCurrentMethod().Name, currentLanguage);
                 foreach (var entry in requiredBuildings)
                 {
-                    Text.text += $"\n\t{entry.Amount}  -  {entry.BuildingName}";
+                    text += $"\n\t{entry.Amount}  -  {entry.BuildingName}";
                 }
             }
+            return text;
         }
     }
 }

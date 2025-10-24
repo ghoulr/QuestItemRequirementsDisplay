@@ -55,8 +55,8 @@ namespace ballban
         public static List<RequiredBuilding> GetRequiredBuildings(Item item)
         {
             return BuildingDataCollection.Instance.Infos
-                .Where(info =>
-                    info.CurrentAmount == 0 && !IsTestingObjectDisplayName(info.DisplayName))
+                // Only consider buildings that are not yet placed
+                .Where(info => info.CurrentAmount == 0 && !IsTestingObjectDisplayName(info.DisplayName))
                 .SelectMany(info => info.cost.items
                     .Where(itemEntry => itemEntry.id == item.TypeID)
                     .Select(itemEntry => new RequiredBuilding
