@@ -155,6 +155,35 @@ namespace QuestItemRequirementsDisplay
                     Text.text += $"\n\t{entry.Amount}  -  {entry.PerkTreeName}/{entry.PerkName}";
                 }
             }
+
+            // Display buildings that require this item
+            var requiredBuildings = Utility.GetRequiredBuildings(item);
+            if (requiredBuildings.Count > 0)
+            {
+                switch (currentLanguage)
+                {
+                    case SystemLanguage.Chinese:
+                    case SystemLanguage.ChineseSimplified:
+                        Text.text += "\n需要该物品解锁的建筑:";
+                        break;
+                    case SystemLanguage.ChineseTraditional:
+                        Text.text += "\n需要該物品解鎖的建築:";
+                        break;
+                    case SystemLanguage.Japanese:
+                        Text.text += "\nこのアイテムが必要な建物:";
+                        break;
+                    case SystemLanguage.Korean:
+                        Text.text += "\n이아이템으로 해금이 필요한 건물:";
+                        break;
+                    default:
+                        Text.text += "\nBuildings required this item:";
+                        break;
+                }
+                foreach (var entry in requiredBuildings)
+                {
+                    Text.text += $"\n\t{entry.Amount}  -  {entry.BuildingName}";
+                }
+            }
         }
     }
 }
