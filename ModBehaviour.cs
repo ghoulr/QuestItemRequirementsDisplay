@@ -1,14 +1,10 @@
 ﻿using ballban;
-using Duckov.Quests;
-using Duckov.Quests.Tasks;
 using Duckov.UI;
 using Duckov.Utilities;
 using ItemStatsSystem;
 using SodaCraft.Localizations;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
 using TMPro;
 using UnityEngine;
 
@@ -74,7 +70,11 @@ namespace QuestItemRequirementsDisplay
             var requiredQuests = Utility.GetRequiredQuests(item);
             if (requiredQuests.Count > 0)
             {
+#if DEBUG
+                var questDisplayNames = String.Join("\n\t", requiredQuests.Select(x => $"{x.DisplayName} - isActiveAndEnabled: {x.isActiveAndEnabled}, enabled: {x.enabled}"));
+#else
                 var questDisplayNames = String.Join("\n\t", requiredQuests.Select(x => x.DisplayName));
+#endif
                 switch (currentLanguage)
                 {
                     case SystemLanguage.Chinese:
@@ -123,6 +123,9 @@ namespace QuestItemRequirementsDisplay
                 foreach (var kv in requiredSubmitItems)
                 {
                     Text.text += $"\n\t{kv.Value}  -  {kv.Key.Master.DisplayName}";
+#if DEBUG
+                    Text.text += $"- isActiveAndEnabled: {kv.Key.Master.isActiveAndEnabled}, enabled: {kv.Key.Master.enabled}";
+#endif
                 }
 
             }
@@ -153,6 +156,9 @@ namespace QuestItemRequirementsDisplay
                 foreach (var entry in requiredPerkEntries)
                 {
                     Text.text += $"\n\t{entry.Amount}  -  {entry.PerkTreeName}/{entry.PerkName}";
+#if DEBUG
+                    Text.text += $"- {entry.Test}";
+#endif
                 }
             }
 
@@ -173,7 +179,7 @@ namespace QuestItemRequirementsDisplay
                         Text.text += "\nこのアイテムが必要な建物:";
                         break;
                     case SystemLanguage.Korean:
-                        Text.text += "\n이아이템으로 해금이 필요한 건물:";
+                        Text.text += "\n이 아이템이 필요한 건물:";
                         break;
                     default:
                         Text.text += "\nBuildings required this item:";
