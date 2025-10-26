@@ -1,5 +1,5 @@
 [h2] About this mod / mod介绍 [/h2]
-这个mod可以在道具上显示当前你未完成任务, 未解锁的天赋, 未建造的建筑里需要的该道具的任务名和数量
+这个mod可以在道具上显示当前你未完成任务, 未解锁的天赋, 未建造的建筑里需要的该道具的数量, 按下shift会显示个别的任务名和数量
 (注意其中有一些任务可能是测试用的, 或者是期间限定解锁的, 或者是数据里有了但是玩家还不能解锁的都会显示出来!)
 支持简体中文, 繁体中文, 英语, 韩语, 日语
 
@@ -25,15 +25,17 @@ If anyone knows how to fix this, please let me know!
 
 
 [h2] Release Note / 更新日志 [/h2]
-v0.4 - 现在未完成的建筑需要的道具数量也可以显示了!
-v0.3 - 现在未解锁的天赋需要的道具数量也可以显示了!
-v0.2 - 修复了道具名中有数字时不能正常显示道具数量的bug
-v0.1 - 发布
+v0.5 - 更改了默认显示需求道具总数, 并且再按下Shift键时显示具体任务名和数量的功能
+v0.4 - 现在未完成的建筑需要的道具数量也可以显示了!  
+v0.3 - 现在未解锁的天赋需要的道具数量也可以显示了!  
+v0.2 - 修复了道具名中有数字时不能正常显示道具数量的bug  
+v0.1 - 发布  
 
-v0.4 - The required item quantities for unbuilt buildings can now be displayed!
-v0.3 - The required item quantities for perks can now be displayed!
-v0.2 - Fixed a bug where item quantities could not be displayed correctly if the item name contained numbers.
-v0.1 - Initial release.
+v0.5 - Changed the default display to show the total required item count, and added a feature to show detailed quest names and quantities when holding the Shift key.
+v0.4 - The required item quantities for unbuilt buildings can now be displayed!  
+v0.3 - The required item quantities for perks can now be displayed!  
+v0.2 - Fixed a bug where item quantities could not be displayed correctly if the item name contained numbers.  
+v0.1 - Initial release.  
 
 
 [url=https://github.com/ballban/QuestItemRequirementsDisplay] Github [/url]
