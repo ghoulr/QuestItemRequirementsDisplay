@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using SodaCraft.Localizations;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace ballban
@@ -33,16 +34,28 @@ namespace ballban
             { "GetRequiredBuildingText_Japanese", "このアイテムが必要な建物:" },
             { "GetRequiredBuildingText_Korean", "이 아이템이 필요한 건물:" },
             { "GetRequiredBuildingText_Default", "Buildings required this item:" },
+
+            { "totalRequiredItemCount_ChineseSimplified", "该物品总需求个数:" },
+            { "totalRequiredItemCount_ChineseTraditional", "該物品總需求個數:" },
+            { "totalRequiredItemCount_Japanese", "このアイテムの合計必要数:" },
+            { "totalRequiredItemCount_Korean", "이 아이템의 필요 개수:" },
+            { "totalRequiredItemCount_Default", "Total required amount of this item:" },
+
+            { "pressShift_ChineseSimplified", "按下 Shift" },
+            { "pressShift_ChineseTraditional", "按下 Shift" },
+            { "pressShift_Japanese", "Shift キーを押して" },
+            { "pressShift_Korean", "Shift 를 눌러주세요" },
+            { "pressShift_Default", "Press Shift" },
         };
 
         /// <summary>
         /// Get the localized string for the given key and language.
         /// </summary>
         /// <param name="key"></param>
-        /// <param name="currentLanguage"></param>
         /// <returns></returns>
-        public static string Get(string key, SystemLanguage currentLanguage)
+        public static string Get(string key, bool isChangLine = true)
         {
+            var currentLanguage = LocalizationManager.CurrentLanguage;
             var systemLanguageStr = currentLanguage switch
             {
                 SystemLanguage.Chinese => "ChineseSimplified",
@@ -52,7 +65,9 @@ namespace ballban
                 SystemLanguage.Korean => currentLanguage.ToString(),
                 _ => "Default",
             };
-            return Dic.TryGetValue($"{key}_{systemLanguageStr}", out var value) ? $"\n{value}" : "";
+            var text = Dic.TryGetValue($"{key}_{systemLanguageStr}", out var value) ? value : "";
+            text = isChangLine ? $"\n{text}" : text;
+            return text;
         }
     }
 }
