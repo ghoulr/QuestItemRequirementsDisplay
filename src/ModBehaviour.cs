@@ -15,9 +15,8 @@ namespace QuestItemRequirementsDisplay
 
     public class ModBehaviour : Duckov.Modding.ModBehaviour
     {
-        private Item? _currenItem = null;
-        private bool? _lastShiftHeld = null;
-        private bool _isShiftHeld = false;
+        private Item? _currentItem = null;
+        private bool _isDetailShown = false;
 
         TextMeshProUGUI? _text = null;
         TextMeshProUGUI Text
@@ -57,23 +56,19 @@ namespace QuestItemRequirementsDisplay
 
         void Update()
         {
-            // Check if shift key is held
-            _isShiftHeld = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+            // Return if detail is already shown or no current item or text is not active
+            if (_isDetailShown || _currentItem == null || !Text.gameObject.activeSelf) return;
 
-            // If the text UI is not active, do nothing
-            if (_currenItem == null || !Text.gameObject.activeSelf) return;
-
-            // If shift key state changed, update the UI
-            if (_isShiftHeld != _lastShiftHeld)
-            {
-                UpdateItemUI(_isShiftHeld, _currenItem);
-                _lastShiftHeld = _isShiftHeld;
-            }
+            // Update the UI if shift is held
+            var isShiftHeld = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+            if (isShiftHeld) UpdateItemUI(true, _currentItem);
         }
 
         private void OnSetupItemHoveringUI(ItemHoveringUI uiInstance, Item item)
         {
-            _currenItem = item;
+            _currentItem = item;
+            _isDetailShown = false;
+
             if (item == null)
             {
                 Text.gameObject.SetActive(false);
@@ -86,7 +81,9 @@ namespace QuestItemRequirementsDisplay
             Text.transform.localScale = Vector3.one;
             Text.fontSize = 20f;
 
-            UpdateItemUI(_isShiftHeld, item);
+            // Check if shift is held
+            var isShiftHeld = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+            UpdateItemUI(isShiftHeld, item);
         }
 
         /// <summary>
@@ -96,6 +93,8 @@ namespace QuestItemRequirementsDisplay
         /// <param name="item"></param>
         private void UpdateItemUI(bool isShiftHeld, Item item)
         {
+            _isDetailShown = isShiftHeld;
+
             // Clear previous text
             Text.text = "";
 
