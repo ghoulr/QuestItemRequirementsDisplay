@@ -8,9 +8,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-namespace ballban
+namespace QuestItemRequirementsDisplay
 {
-    static public class Utility
+    static public class GetRequiredItemAmount
     {
         public static List<Quest> TotalQuests = InitTotalQuests();
 
@@ -158,95 +158,6 @@ namespace ballban
                 .ToDictionary(x => x.submitItem, x => x.amountStr);
 
             return requiredSubmitItems;
-        }
-
-        /// <summary>
-        /// Get the total amount of the specified item type ID across all inventories.
-        /// </summary>
-        /// <param name="typeID"></param>
-        /// <returns></returns>
-        public static int GetTotalItemAmount(int typeID)
-        {
-            var totalAmount = GetItemAmountInCharacterInventory(typeID)
-                            + GetItemAmountInPetInventory(typeID)
-                            + GetItemAmountInPlayerStorage(typeID)
-                            + GetItemAmountInInventoryItems(typeID);
-            return totalAmount;
-        }
-
-        /// <summary>
-        /// Get the total amount of the specified item type ID in the character's inventory.
-        /// </summary>
-        /// <param name="typeID"></param>
-        /// <returns></returns>
-        public static int GetItemAmountInCharacterInventory(int typeID)
-        {
-            var inventory = LevelManager.Instance.MainCharacter.CharacterItem.Inventory;
-            var amount = GetItemAmountFromInventory(inventory, typeID);
-            return amount;
-        }
-
-        /// <summary>
-        /// Get the total amount of the specified item type ID in the pet's inventory.
-        /// </summary>
-        /// <param name="typeID"></param>
-        /// <returns></returns>
-        public static int GetItemAmountInPetInventory(int typeID)
-        {
-            var inventory = LevelManager.Instance.PetProxy.Inventory;
-            var amount = GetItemAmountFromInventory(inventory, typeID);
-            return amount;
-        }
-
-        /// <summary>
-        /// Get the total amount of the specified item type ID in the player's storage.
-        /// </summary>
-        /// <param name="typeID"></param>
-        /// <returns></returns>
-        public static int GetItemAmountInPlayerStorage(int typeID)
-        {
-            var inventory = PlayerStorage.Inventory;
-            var amount = GetItemAmountFromInventory(inventory, typeID);
-            return amount;
-        }
-
-        /// <summary>
-        /// Get the total amount of the specified item type ID in the given inventory.
-        /// </summary>
-        /// <param name="inventory"></param>
-        /// <param name="typeID"></param>
-        /// <returns></returns>
-        private static int GetItemAmountFromInventory(Inventory inventory, int typeID)
-        {
-            if (inventory == null) return 0;
-
-            var items = inventory.FindAll(item => item != null && item.TypeID == typeID);
-            var amount = items.Sum(item => item.StackCount);
-            return amount;
-        }
-
-        /// <summary>
-        /// Get the total amount of the specified item type ID across all inventory items.
-        /// </summary>
-        /// <param name="typeID"></param>
-        /// <returns></returns>
-        public static int GetItemAmountInInventoryItems(int typeID)
-        {
-            var allInventories = new[]
-            {
-                LevelManager.Instance.MainCharacter.CharacterItem.Inventory,
-                LevelManager.Instance.PetProxy.Inventory,
-                PlayerStorage.Inventory
-            };
-
-            var itemAmount = allInventories
-                .Where(inv => inv != null)
-                .SelectMany(inv => inv.FindAll(item => item != null && item.Slots != null))
-                .SelectMany(item => item.Slots.list.FindAll(slot => slot != null && slot.Content != null))
-                .Where(slot => slot.Content.TypeID == typeID)
-                .Sum(slot => slot.Content.StackCount);
-
-            return itemAmount;
         }
     }
 }

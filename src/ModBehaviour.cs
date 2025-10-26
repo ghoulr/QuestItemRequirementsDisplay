@@ -1,5 +1,4 @@
-﻿using ballban;
-using Duckov.UI;
+﻿using Duckov.UI;
 using Duckov.Utilities;
 using ItemStatsSystem;
 using System;
@@ -14,10 +13,10 @@ namespace QuestItemRequirementsDisplay
 
     public class ModBehaviour : Duckov.Modding.ModBehaviour
     {
-        private Item? _currentItem = null;
+        private Item _currentItem = null;
         private bool _isDetailShown = false;
 
-        TextMeshProUGUI? _text = null;
+        TextMeshProUGUI _text = null;
         TextMeshProUGUI Text
         {
             get
@@ -42,6 +41,8 @@ namespace QuestItemRequirementsDisplay
         {
             ItemHoveringUI.onSetupItem += OnSetupItemHoveringUI;
             ItemHoveringUI.onSetupMeta += OnSetupMeta;
+            // Clone player storage inventory on level begin initializing
+            LevelManager.OnLevelBeginInitializing += GetItemAmount.ClonePlayerStorageInventory;
         }
         void OnDisable()
         {
@@ -112,10 +113,9 @@ namespace QuestItemRequirementsDisplay
             }
 
             // Get total required item count text
-            var itemAmountInCharacterInventory = Utility.GetItemAmountInCharacterInventory(item.TypeID) + Utility.GetItemAmountInPetInventory(item.TypeID);
-            var itemAmountInPlayerStorage = Utility.GetItemAmountInPlayerStorage(item.TypeID);
-            var itemAmountInInventoryItems = Utility.GetItemAmountInInventoryItems(item.TypeID);
-            var totalItemAmount = itemAmountInCharacterInventory + itemAmountInPlayerStorage + itemAmountInInventoryItems;
+            var itemAmountInCharacterInventory = GetItemAmount.InCharacterInventory(item.TypeID) + GetItemAmount.InPetInventory(item.TypeID);
+            var itemAmountInPlayerStorage = GetItemAmount.InPlayerStorage(item.TypeID);
+            var totalItemAmount = itemAmountInCharacterInventory + itemAmountInPlayerStorage;
 
             // Determine color based on whether the player has enough items
             var colorOfTotalitemAmount = totalItemAmount >= totalRequiredItemAmount ? "green" : "red";
@@ -155,7 +155,7 @@ namespace QuestItemRequirementsDisplay
         {
             var text = string.Empty;
             var amount = 0;
-            var requiredQuests = Utility.GetRequiredQuests(item);
+            var requiredQuests = GetRequiredItemAmount.GetRequiredQuests(item);
             if (requiredQuests.Count > 0)
             {
 #if DEBUG
@@ -179,7 +179,7 @@ namespace QuestItemRequirementsDisplay
         {
             var text = string.Empty;
             var amount = 0;
-            var requiredSubmitItems = Utility.GetRequiredSubmitItems(item);
+            var requiredSubmitItems = GetRequiredItemAmount.GetRequiredSubmitItems(item);
             if (requiredSubmitItems.Count > 0)
             {
                 text += LocalizedText.Get(MethodBase.GetCurrentMethod().Name);
@@ -204,7 +204,7 @@ namespace QuestItemRequirementsDisplay
         {
             var text = string.Empty;
             var amount = 0L;
-            var requiredPerkEntries = Utility.GetRequiredPerkEntries(item);
+            var requiredPerkEntries = GetRequiredItemAmount.GetRequiredPerkEntries(item);
             if (requiredPerkEntries.Count > 0)
             {
                 text += LocalizedText.Get(MethodBase.GetCurrentMethod().Name);
@@ -229,7 +229,7 @@ namespace QuestItemRequirementsDisplay
         {
             var text = string.Empty;
             var amount = 0L;
-            var requiredBuildings = Utility.GetRequiredBuildings(item);
+            var requiredBuildings = GetRequiredItemAmount.GetRequiredBuildings(item);
             if (requiredBuildings.Count > 0)
             {
                 text += LocalizedText.Get(MethodBase.GetCurrentMethod().Name);

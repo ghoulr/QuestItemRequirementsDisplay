@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace ballban
+namespace QuestItemRequirementsDisplay
 {
     public static class LocalizedText
     {
