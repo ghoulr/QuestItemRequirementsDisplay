@@ -2,7 +2,6 @@
 using Duckov.UI;
 using Duckov.Utilities;
 using ItemStatsSystem;
-using SodaCraft.Localizations;
 using System;
 using System.Linq;
 using System.Reflection;
@@ -87,7 +86,7 @@ namespace QuestItemRequirementsDisplay
         }
 
         /// <summary>
-        /// Update the item UI with required item counts.
+        /// Update the item UI with required item amount.
         /// </summary>
         /// <param name="isShiftHeld"></param>
         /// <param name="item"></param>
@@ -105,15 +104,25 @@ namespace QuestItemRequirementsDisplay
             (var requiredBuildingText, var requiredBuildingItemAmount) = GetRequiredBuildingText(item);
 
             // Calculate total required item count
-            var totalRequiredItemCount = requiredQuestItemAmount + requiredSubmittingQuestItemAmount + requiredPerkItemAmount + requiredBuildingItemAmount;
-            if (totalRequiredItemCount == 0)
+            var totalRequiredItemAmount = requiredQuestItemAmount + requiredSubmittingQuestItemAmount + requiredPerkItemAmount + requiredBuildingItemAmount;
+            if (totalRequiredItemAmount == 0)
             {
                 Text.gameObject.SetActive(false);
                 return;
             }
-            var totalRequiredItemCountText = LocalizedText.Get(nameof(totalRequiredItemCount));
-            // Total required amount of this item: N
-            Text.text += $"{totalRequiredItemCountText} {totalRequiredItemCount}";
+
+            // Get total required item count text
+            var itemAmountInCharacterInventory = Utility.GetItemAmountInCharacterInventory(item.TypeID) + Utility.GetItemAmountInPetInventory(item.TypeID);
+            var itemAmountInPlayerStorage = Utility.GetItemAmountInPlayerStorage(item.TypeID);
+            var itemAmountInInventoryItems = Utility.GetItemAmountInInventoryItems(item.TypeID);
+            var totalItemAmount = itemAmountInCharacterInventory + itemAmountInPlayerStorage + itemAmountInInventoryItems;
+
+            // Determine color based on whether the player has enough items
+            var colorOfTotalitemAmount = totalItemAmount >= totalRequiredItemAmount ? "green" : "red";
+
+            // Show Text [Total required amount of this item: N]
+            var totalRequiredItemAmountText = LocalizedText.Get(nameof(totalRequiredItemAmount));
+            Text.text += $"{totalRequiredItemAmountText} <color={colorOfTotalitemAmount}>{totalItemAmount}</color> / {totalRequiredItemAmount}";
 
             // If shift is held, show detailed information
             if (isShiftHeld)
@@ -126,8 +135,15 @@ namespace QuestItemRequirementsDisplay
             else
             {
                 // ----- Press Shift -----
-                Text.text += $"\n\t----- {LocalizedText.Get("pressShift", false)} -----\n";
+                Text.text += $"\n\t<color=yellow><size=17>----- {LocalizedText.Get("pressShift", false)} -----<size=17></color>";
             }
+
+
+            //// Show item amounts
+            //Text.text += "\n";
+            //Text.text += $"\n In Character Inventory: {itemAmountInCharacterInventory}";
+            //Text.text += $"\n In Player Storage: {itemAmountInPlayerStorage}";
+            //Text.text += $"\n In Inventory Items: {itemAmountInInventoryItems}";
         }
 
         /// <summary>
@@ -187,7 +203,7 @@ namespace QuestItemRequirementsDisplay
         (string, int) GetRequiredPerkText(Item item)
         {
             var text = string.Empty;
-            var amount = 0l;
+            var amount = 0L;
             var requiredPerkEntries = Utility.GetRequiredPerkEntries(item);
             if (requiredPerkEntries.Count > 0)
             {
@@ -212,7 +228,7 @@ namespace QuestItemRequirementsDisplay
         (string, int) GetRequiredBuildingText(Item item)
         {
             var text = string.Empty;
-            var amount = 0l;
+            var amount = 0L;
             var requiredBuildings = Utility.GetRequiredBuildings(item);
             if (requiredBuildings.Count > 0)
             {

@@ -35,16 +35,16 @@ namespace ballban
             { "GetRequiredBuildingText_Korean", "이 아이템이 필요한 건물:" },
             { "GetRequiredBuildingText_Default", "Buildings required this item:" },
 
-            { "totalRequiredItemCount_ChineseSimplified", "该物品总需求个数:" },
-            { "totalRequiredItemCount_ChineseTraditional", "該物品總需求個數:" },
-            { "totalRequiredItemCount_Japanese", "このアイテムの合計必要数:" },
-            { "totalRequiredItemCount_Korean", "이 아이템의 필요 개수:" },
-            { "totalRequiredItemCount_Default", "Total required amount of this item:" },
+            { "totalRequiredItemAmount_ChineseSimplified", "总数/总需求:" },
+            { "totalRequiredItemAmount_ChineseTraditional", "總數/總需求:" },
+            { "totalRequiredItemAmount_Japanese", "合計/必要数:" },
+            { "totalRequiredItemAmount_Korean", "총합/필요개수:" },
+            { "totalRequiredItemAmount_Default", "Total/Required amount:" },
 
             { "pressShift_ChineseSimplified", "按下 Shift" },
             { "pressShift_ChineseTraditional", "按下 Shift" },
-            { "pressShift_Japanese", "Shift キーを押して" },
-            { "pressShift_Korean", "Shift 를 눌러주세요" },
+            { "pressShift_Japanese", "Shift キー" },
+            { "pressShift_Korean", "Shift 버튼" },
             { "pressShift_Default", "Press Shift" },
         };
 
