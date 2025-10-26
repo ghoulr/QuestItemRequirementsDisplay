@@ -39,4 +39,4 @@ v0.1 - Initial release.
 
 
 [url=https://github.com/ballban/QuestItemRequirementsDisplay] Github [/url]
-v0.4 by ballban
+v0.5 by ballban
