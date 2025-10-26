@@ -1,31 +1,39 @@
-﻿using ItemStatsSystem;
+﻿using HarmonyLib;
+using ItemStatsSystem;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace QuestItemRequirementsDisplay
 {
-    internal class GetItemAmount
+    [HarmonyPatch(typeof(PlayerStorage), "OnDestroy")]
+    public class PlayerStorageOnDestroyPatch
+    {
+        static void Prefix(PlayerStorage __instance)
+        {
+            GetItemAmount.ClonePlayerStorageInventory();
+        }
+    }
+
+    public class GetItemAmount
     {
         // Cached copy of the player's storage inventory
-        private static List<Item> _playerStorageInventory;
-        private static List<Item> _playerStorageInventorySlots;
-        public static List<Item> PlayerStorageInventory => _playerStorageInventory;
-        public static List<Item> PlayerStorageInventorySlots => _playerStorageInventorySlots;
+        public static List<Item> PlayerStorageInventoryItems = new List<Item>();
 
         /// <summary>
         /// Clone the player's storage inventory to avoid null reference issues
         /// </summary>
         public static void ClonePlayerStorageInventory()
         {
-            if (PlayerStorage.Inventory == null) return;
-            _playerStorageInventory = PlayerStorage.Inventory.FindAll(item => item != null);
-            _playerStorageInventorySlots = PlayerStorage.Inventory
+            if (PlayerStorage.Inventory == null || PlayerStorage.Inventory.Content == null) return;
+            PlayerStorageInventoryItems.Clear();
+            PlayerStorageInventoryItems.AddRange(PlayerStorage.Inventory.Content.FindAll(item => item != null));
+            PlayerStorageInventoryItems.AddRange(PlayerStorage.Inventory.Content
                 .FindAll(item => item != null && item.Slots != null && item.Slots.list != null)
                 .SelectMany(item => item.Slots.list
                     .Where(slot => slot != null && slot.Content != null)
                     .Select(slot => slot.Content)
-                    )
-                .ToList();
+                )
+            );
         }
 
         /// <summary>
@@ -75,8 +83,7 @@ namespace QuestItemRequirementsDisplay
             var amount = 0;
             if (PlayerStorage.Inventory == null)
             {
-                amount += FromInventory(PlayerStorageInventory, typeID);
-                amount += FromInventory(PlayerStorageInventorySlots, typeID);
+                amount += FromInventory(PlayerStorageInventoryItems, typeID);
             }
             else
             {

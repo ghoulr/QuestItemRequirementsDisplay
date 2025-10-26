@@ -16,6 +16,7 @@
 		<Reference Include="$(DuckovPath)\Duckov_Data\Managed\TeamSoda.*" />
 		<Reference Include="$(DuckovPath)\Duckov_Data\Managed\ItemStatsSystem.dll" />
 		<Reference Include="$(DuckovPath)\Duckov_Data\Managed\Unity*" />
+		<PackageReference Include="Lib.Harmony" Version="2.4.1" />
 		<Reference Include="$(DuckovPath)\Duckov_Data\Managed\SodaLocalization.dll" />
 	</ItemGroup>
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent">

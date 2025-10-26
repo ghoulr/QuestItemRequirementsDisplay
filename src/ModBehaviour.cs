@@ -1,5 +1,6 @@
 ﻿using Duckov.UI;
 using Duckov.Utilities;
+using HarmonyLib;
 using ItemStatsSystem;
 using System;
 using System.Linq;
@@ -10,9 +11,10 @@ using UnityEngine;
 
 namespace QuestItemRequirementsDisplay
 {
-
     public class ModBehaviour : Duckov.Modding.ModBehaviour
     {
+        private Harmony harmony;
+
         private Item _currentItem = null;
         private bool _isDetailShown = false;
 
@@ -41,8 +43,8 @@ namespace QuestItemRequirementsDisplay
         {
             ItemHoveringUI.onSetupItem += OnSetupItemHoveringUI;
             ItemHoveringUI.onSetupMeta += OnSetupMeta;
-            // Clone player storage inventory on level begin initializing
-            LevelManager.OnLevelBeginInitializing += GetItemAmount.ClonePlayerStorageInventory;
+            harmony = new Harmony("DisplayRequiredItemCount");
+            harmony.PatchAll(Assembly.GetExecutingAssembly());
         }
         void OnDisable()
         {
