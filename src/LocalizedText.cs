@@ -23,6 +23,12 @@ namespace QuestItemRequirementsDisplay
             { "GetRequiredSubmittingQuestText_Korean", "이아이템 재출이 필요한 퀘스트:" },
             { "GetRequiredSubmittingQuestText_Default", "Quests required submit this item:" },
 
+            { "GetRequiredUseQuestText_ChineseSimplified", "需要使用该物品的任务:" },
+            { "GetRequiredUseQuestText_ChineseTraditional", "需要使用該物品的任務:" },
+            { "GetRequiredUseQuestText_Japanese", "このアイテム使用が必要なクエスト:" },
+            { "GetRequiredUseQuestText_Korean", "이아이템 사용이 필요한 퀘스트:" },
+            { "GetRequiredUseQuestText_Default", "Quests required use this item:" },
+
             { "GetRequiredPerkText_ChineseSimplified", "需要该物品解锁的天赋:" },
             { "GetRequiredPerkText_ChineseTraditional", "需要該物品解鎖的天賦:" },
             { "GetRequiredPerkText_Japanese", "このアイテムが必要なスキル:" },
