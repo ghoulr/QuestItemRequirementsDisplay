@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using HarmonyLib;
 
 namespace QuestItemRequirementsDisplay
 {
@@ -158,6 +159,33 @@ namespace QuestItemRequirementsDisplay
                 .ToDictionary(x => x.submitItem, x => x.amountStr);
 
             return requiredSubmitItems;
+        }
+
+        public static Dictionary<QuestTask_UseItem, long> GetRequiredUseItems(Item item)
+        {
+            var itemTypeIDRef = AccessTools.FieldRefAccess<int>(typeof(QuestTask_UseItem), "itemTypeID");
+            var requireAmountRef = AccessTools.FieldRefAccess<int>(typeof(QuestTask_UseItem), "requireAmount");
+
+            var finishedQuestsId = new HashSet<int>(QuestManager.Instance.HistoryQuests.Select(q => q.ID));
+
+            var requiredUseItems = TotalQuests
+                .Where(quest => !finishedQuestsId.Contains(quest.ID) && quest.Tasks != null)
+                .SelectMany(quest =>
+                    quest
+                        .Tasks.OfType<QuestTask_UseItem>()
+                        .Where(useItem =>
+                        {
+                            int itemTypeID = itemTypeIDRef(useItem);
+                            return !useItem.IsFinished() && itemTypeID == item.TypeID;
+                        })
+                        .Select(useItem =>
+                        {
+                            long requireAmount = requireAmountRef(useItem);
+                            return new { useItem, requireAmount };
+                        })
+                )
+                .ToDictionary(x => x.useItem, x => x.requireAmount);
+            return requiredUseItems;
         }
     }
 }

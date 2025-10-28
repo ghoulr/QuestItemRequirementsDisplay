@@ -103,11 +103,12 @@ namespace QuestItemRequirementsDisplay
             // Get required item information
             (var requiredQuestText, var requiredQuestItemAmount) = GetRequiredQuestText(item);
             (var requiredSubmittingQuestText, var requiredSubmittingQuestItemAmount) = GetRequiredSubmittingQuestText(item);
+            (var requiredUseQuestText, var requiredUseQuestItemAmount) = GetRequiredUseQuestText(item);
             (var requiredPerkText, var requiredPerkItemAmount) = GetRequiredPerkText(item);
             (var requiredBuildingText, var requiredBuildingItemAmount) = GetRequiredBuildingText(item);
 
             // Calculate total required item count
-            var totalRequiredItemAmount = requiredQuestItemAmount + requiredSubmittingQuestItemAmount + requiredPerkItemAmount + requiredBuildingItemAmount;
+            var totalRequiredItemAmount = requiredQuestItemAmount + requiredSubmittingQuestItemAmount + requiredUseQuestItemAmount + requiredPerkItemAmount + requiredBuildingItemAmount;
             if (totalRequiredItemAmount == 0)
             {
                 Text.gameObject.SetActive(false);
@@ -131,6 +132,7 @@ namespace QuestItemRequirementsDisplay
             {
                 Text.text += requiredQuestText;
                 Text.text += requiredSubmittingQuestText;
+                Text.text += requiredUseQuestText;
                 Text.text += requiredPerkText;
                 Text.text += requiredBuildingText;
             }
@@ -189,6 +191,26 @@ namespace QuestItemRequirementsDisplay
                 {
                     text += $"\n\t{kv.Value}  -  {kv.Key.Master.DisplayName}";
                     amount += int.TryParse(kv.Value, out var result) ? result : 0;
+#if DEBUG
+                    text += $"- isActiveAndEnabled: {kv.Key.Master.isActiveAndEnabled}, enabled: {kv.Key.Master.enabled}";
+#endif
+                }
+            }
+            return (text, amount);
+        }
+
+        (string, int) GetRequiredUseQuestText(Item item)
+        {
+            var text = string.Empty;
+            var amount = 0;
+            var requiredUseItems = GetRequiredItemAmount.GetRequiredUseItems(item);
+            if (requiredUseItems.Count > 0)
+            {
+                text += LocalizedText.Get(MethodBase.GetCurrentMethod().Name);
+                foreach (var kv in requiredUseItems)
+                {
+                    text += $"\n\t{kv.Value}  -  {kv.Key.Master.DisplayName}";
+                    amount += (int)kv.Value;
 #if DEBUG
                     text += $"- isActiveAndEnabled: {kv.Key.Master.isActiveAndEnabled}, enabled: {kv.Key.Master.enabled}";
 #endif
