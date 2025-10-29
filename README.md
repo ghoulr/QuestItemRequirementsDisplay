@@ -1,8 +1,10 @@
 ## 使用说明 / How to use
 Steam玩家直接进入[Steam创意工坊](https://steamcommunity.com/sharedfiles/filedetails/?id=3591517959)订阅即可  
+不知道为什么每次更新都要卡一次审核, 可以进入[备份用创意工坊](https://steamcommunity.com/sharedfiles/filedetails/?id=3595582953)订阅  
 非Steam玩家把"QuestItemRequirementsDisplay"这个文件夹直接放到"Escape from Duckov\Duckov_Data\Mods\"目录下即可  
 
 Steam players can simply subscribe to the mod on the [Steam Workshop](https://steamcommunity.com/sharedfiles/filedetails/?id=3591517959).  
+I don't know why every update gets stuck in review, but you can subscribe to the [backup Workshop](https://steamcommunity.com/sharedfiles/filedetails/?id=3595582953) instead.  
 Non-Steam players can place the "QuestItemRequirementsDisplay" folder directly into the "Escape from Duckov\Duckov_Data\Mods" directory.  
 
 

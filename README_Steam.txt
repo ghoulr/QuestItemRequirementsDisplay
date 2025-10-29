@@ -1,3 +1,8 @@
+[h2]说明[/h2]
+妈的不小心传错一个文件, 把测试用的xml文件传上来了, 导致原mod一直被卡审查, 先穿一个备份上来, 等原本的审查通过我就改回去, 抱歉抱歉!
+[url=https://steamcommunity.com/sharedfiles/filedetails/?id=3591517959] 原mod页面 [/url]
+[url=https://steamcommunity.com/sharedfiles/filedetails/?id=3595582953] 备份mod页面 [/url]
+
 [h2] About this mod / mod介绍 [/h2]
 这个mod可以在道具上显示当前你未完成任务, 未解锁的天赋, 未建造的建筑里需要的该道具的数量, 按下shift会显示个别的任务名和数量
 (注意其中有一些任务可能是测试用的, 或者是期间限定解锁的, 或者是数据里有了但是玩家还不能解锁的都会显示出来!)
