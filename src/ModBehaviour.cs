@@ -1,4 +1,5 @@
-﻿using Duckov.UI;
+﻿using Duckov.Quests.Tasks;
+using Duckov.UI;
 using Duckov.Utilities;
 using HarmonyLib;
 using ItemStatsSystem;
@@ -13,6 +14,9 @@ namespace QuestItemRequirementsDisplay
 {
     public class ModBehaviour : Duckov.Modding.ModBehaviour
     {
+        public readonly string ModName = "QuestItemRequirementsDisplay";
+        public readonly string Version = "0.5";
+
         private Harmony harmony;
 
         private Item _currentItem = null;
@@ -33,6 +37,9 @@ namespace QuestItemRequirementsDisplay
         void Awake()
         {
             Debug.Log("DisplayRequiredItemCount Loaded!!!");
+#if DEBUG
+            Test.RunTests();
+#endif
         }
         void OnDestroy()
         {
@@ -99,15 +106,18 @@ namespace QuestItemRequirementsDisplay
 
             // Clear previous text
             Text.text = "";
+#if DEBUG
+            Text.text += "\n <color=red><size=25>---------- Debug Build ----------<size=25></color>";
+#endif
 
             // Get required item information
             (var requiredQuestText, var requiredQuestItemAmount) = GetRequiredQuestText(item);
-            (var requiredSubmittingQuestText, var requiredSubmittingQuestItemAmount) = GetRequiredSubmittingQuestText(item);
+            (var requiredSubmitQuestText, var requiredSubmittingQuestItemAmount) = GetRequiredSubmittingQuestText(item);
             (var requiredUseQuestText, var requiredUseQuestItemAmount) = GetRequiredUseQuestText(item);
             (var requiredPerkText, var requiredPerkItemAmount) = GetRequiredPerkText(item);
             (var requiredBuildingText, var requiredBuildingItemAmount) = GetRequiredBuildingText(item);
 
-            // Calculate total required item count
+            // Calculate total required item amount
             var totalRequiredItemAmount = requiredQuestItemAmount + requiredSubmittingQuestItemAmount + requiredUseQuestItemAmount + requiredPerkItemAmount + requiredBuildingItemAmount;
             if (totalRequiredItemAmount == 0)
             {
@@ -115,7 +125,7 @@ namespace QuestItemRequirementsDisplay
                 return;
             }
 
-            // Get total required item count text
+            // Get total required item amount text
             var itemAmountInCharacterInventory = GetItemAmount.InCharacterInventory(item.TypeID) + GetItemAmount.InPetInventory(item.TypeID);
             var itemAmountInPlayerStorage = GetItemAmount.InPlayerStorage(item.TypeID);
             var totalItemAmount = itemAmountInCharacterInventory + itemAmountInPlayerStorage;
@@ -131,14 +141,14 @@ namespace QuestItemRequirementsDisplay
             if (isShiftHeld)
             {
                 Text.text += requiredQuestText;
-                Text.text += requiredSubmittingQuestText;
+                Text.text += requiredSubmitQuestText;
                 Text.text += requiredUseQuestText;
                 Text.text += requiredPerkText;
                 Text.text += requiredBuildingText;
             }
             else
             {
-                // ----- Press Shift -----
+                // Display text: ----- Press Shift -----
                 Text.text += $"\n\t<color=yellow><size=17>----- {LocalizedText.Get("pressShift", false)} -----<size=17></color>";
             }
 
@@ -155,22 +165,21 @@ namespace QuestItemRequirementsDisplay
         /// </summary>
         /// <param name="item"></param>
         /// <returns></returns>
-        (string, int) GetRequiredQuestText(Item item)
+        public (string, int) GetRequiredQuestText(Item item)
         {
             var text = string.Empty;
             var amount = 0;
             var requiredQuests = GetRequiredItemAmount.GetRequiredQuests(item);
-            if (requiredQuests.Count > 0)
-            {
+            if (requiredQuests.Count == 0) return (text, amount);
+
+            var questDisplayNames = String.Join("\n\t", requiredQuests.Select(x => $"{x.RequiredItemCount}  -  {x.DisplayName}"));
 #if DEBUG
-                var questDisplayNames = String.Join("\n\t", requiredQuests.Select(x => $"{x.DisplayName} - isActiveAndEnabled: {x.isActiveAndEnabled}, enabled: {x.enabled}"));
-#else
-                var questDisplayNames = String.Join("\n\t", requiredQuests.Select(x => $"{x.RequiredItemCount}  -  {x.DisplayName}"));
-                amount = requiredQuests.Sum(x => x.RequiredItemCount);
+            questDisplayNames = String.Join("\n\t", requiredQuests.Select(x => $"{x.RequiredItemCount}  -  {x.DisplayName}  -  Id: {x.ID}"));
 #endif
-                text = LocalizedText.Get(MethodBase.GetCurrentMethod().Name);
-                text += $"\n\t{questDisplayNames}";
-            }
+            amount = requiredQuests.Sum(x => x.RequiredItemCount);
+            text = LocalizedText.Get(MethodBase.GetCurrentMethod().Name);
+            text += $"\n\t{questDisplayNames}";
+
             return (text, amount);
         }
 
@@ -179,43 +188,45 @@ namespace QuestItemRequirementsDisplay
         /// </summary>
         /// <param name="item"></param>
         /// <returns></returns>
-        (string, int) GetRequiredSubmittingQuestText(Item item)
+        public (string, int) GetRequiredSubmittingQuestText(Item item)
         {
             var text = string.Empty;
             var amount = 0;
             var requiredSubmitItems = GetRequiredItemAmount.GetRequiredSubmitItems(item);
-            if (requiredSubmitItems.Count > 0)
+            var requiredAmountRef = AccessTools.FieldRefAccess<int>(typeof(SubmitItems), "requiredAmount");
+
+            if (requiredSubmitItems.Count == 0) return (text, amount);
+
+            text += LocalizedText.Get(MethodBase.GetCurrentMethod().Name);
+            foreach (var submitItem in requiredSubmitItems)
             {
-                text += LocalizedText.Get(MethodBase.GetCurrentMethod().Name);
-                foreach (var kv in requiredSubmitItems)
-                {
-                    text += $"\n\t{kv.Value}  -  {kv.Key.Master.DisplayName}";
-                    amount += int.TryParse(kv.Value, out var result) ? result : 0;
-#if DEBUG
-                    text += $"- isActiveAndEnabled: {kv.Key.Master.isActiveAndEnabled}, enabled: {kv.Key.Master.enabled}";
-#endif
-                }
+                var reqAmount = requiredAmountRef(submitItem);
+                text += $"\n\t{reqAmount}  -  {submitItem.Master.DisplayName}";
+                amount += reqAmount;
             }
+
             return (text, amount);
         }
 
-        (string, int) GetRequiredUseQuestText(Item item)
+        /// <summary>
+        /// Get the display text for quests that require using the given item.
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns></returns>
+        public (string, int) GetRequiredUseQuestText(Item item)
         {
             var text = string.Empty;
             var amount = 0;
             var requiredUseItems = GetRequiredItemAmount.GetRequiredUseItems(item);
-            if (requiredUseItems.Count > 0)
+            if (requiredUseItems.Count == 0) return (text, amount);
+
+            text += LocalizedText.Get(MethodBase.GetCurrentMethod().Name);
+            foreach (var kv in requiredUseItems)
             {
-                text += LocalizedText.Get(MethodBase.GetCurrentMethod().Name);
-                foreach (var kv in requiredUseItems)
-                {
-                    text += $"\n\t{kv.Value}  -  {kv.Key.Master.DisplayName}";
-                    amount += (int)kv.Value;
-#if DEBUG
-                    text += $"- isActiveAndEnabled: {kv.Key.Master.isActiveAndEnabled}, enabled: {kv.Key.Master.enabled}";
-#endif
-                }
+                text += $"\n\t{kv.Value}  -  {kv.Key.Master.DisplayName}";
+                amount += (int)kv.Value;
             }
+
             return (text, amount);
         }
 
@@ -224,23 +235,20 @@ namespace QuestItemRequirementsDisplay
         /// </summary>
         /// <param name="item"></param>
         /// <returns></returns>
-        (string, int) GetRequiredPerkText(Item item)
+        public (string, int) GetRequiredPerkText(Item item)
         {
             var text = string.Empty;
             var amount = 0L;
             var requiredPerkEntries = GetRequiredItemAmount.GetRequiredPerkEntries(item);
-            if (requiredPerkEntries.Count > 0)
+            if (requiredPerkEntries.Count == 0) return (text, (int)amount);
+
+            text += LocalizedText.Get(MethodBase.GetCurrentMethod().Name);
+            foreach (var entry in requiredPerkEntries)
             {
-                text += LocalizedText.Get(MethodBase.GetCurrentMethod().Name);
-                foreach (var entry in requiredPerkEntries)
-                {
-                    text += $"\n\t{entry.Amount}  -  {entry.PerkTreeName}/{entry.PerkName}";
-                    amount += entry.Amount;
-#if DEBUG
-                    text += $"- {entry.Test}";
-#endif
-                }
+                text += $"\n\t{entry.Amount}  -  {entry.PerkTreeName}/{entry.PerkName}";
+                amount += entry.Amount;
             }
+
             return (text, (int)amount);
         }
 
@@ -249,20 +257,20 @@ namespace QuestItemRequirementsDisplay
         /// </summary>
         /// <param name="item"></param>
         /// <returns></returns>
-        (string, int) GetRequiredBuildingText(Item item)
+        public (string, int) GetRequiredBuildingText(Item item)
         {
             var text = string.Empty;
             var amount = 0L;
             var requiredBuildings = GetRequiredItemAmount.GetRequiredBuildings(item);
-            if (requiredBuildings.Count > 0)
+            if (requiredBuildings.Count == 0) return (text, (int)amount);
+
+            text += LocalizedText.Get(MethodBase.GetCurrentMethod().Name);
+            foreach (var entry in requiredBuildings)
             {
-                text += LocalizedText.Get(MethodBase.GetCurrentMethod().Name);
-                foreach (var entry in requiredBuildings)
-                {
-                    text += $"\n\t{entry.Amount}  -  {entry.BuildingName}";
-                    amount += entry.Amount;
-                }
+                text += $"\n\t{entry.Amount}  -  {entry.BuildingName}";
+                amount += entry.Amount;
             }
+
             return (text, (int)amount);
         }
     }
