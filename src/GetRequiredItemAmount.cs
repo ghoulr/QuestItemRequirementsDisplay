@@ -192,7 +192,7 @@ namespace QuestItemRequirementsDisplay
         /// <returns></returns>
         public static List<RequiredBuilding> GetRequiredBuildings(Item item)
         {
-            // PetHouse is excluded because it's not been implemented yet
+            // PetHouse is excluded because it has not been implemented yet
             var excludedBuildingId = "PetHouse";
             var collection = BuildingDataCollection.Instance;
             if (collection == null)
