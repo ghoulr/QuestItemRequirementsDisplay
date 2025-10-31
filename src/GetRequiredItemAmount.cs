@@ -23,7 +23,7 @@ namespace QuestItemRequirementsDisplay
         // Trees to exclude from perk calculations:
         // - "Blueprint": weapon/blueprint unlocks; not considered character perk progression
         // - "PerkTree_Farming": farming-related tree currently out of scope
-        private static readonly HashSet<string> DeniedPerkTreeIds = new HashSet<string>(StringComparer.Ordinal)
+        private static readonly HashSet<string> ExcludedPerkTreeIds = new HashSet<string>(StringComparer.Ordinal)
         {
             "Blueprint",
             "PerkTree_Farming",
@@ -95,8 +95,10 @@ namespace QuestItemRequirementsDisplay
         static public List<RequiredPerk> GetRequiredPerkEntries(Item item)
         {
             var requiredPerkEntries = PerkTreeManager.Instance.perkTrees
-                .Where(perkTree => !DeniedPerkTreeIds.Contains(perkTree.ID))
+                // Exclude specified perk trees
+                .Where(perkTree => !ExcludedPerkTreeIds.Contains(perkTree.ID))
                 .SelectMany(perkTree => perkTree.Perks
+                    // Select only locked perks with requirements
                     .Where(perk => perk != null && !perk.Unlocked && perk.Requirement != null && perk.Requirement.cost.items != null)
                     .SelectMany(perk => perk.Requirement.cost.items
                         .Where(itemEntry => itemEntry.id == item.TypeID)
