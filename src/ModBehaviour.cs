@@ -37,9 +37,6 @@ namespace QuestItemRequirementsDisplay
         void Awake()
         {
             Debug.Log("DisplayRequiredItemCount Loaded!!!");
-#if DEBUG
-            Test.RunTests();
-#endif
         }
         void OnDestroy()
         {
@@ -65,6 +62,10 @@ namespace QuestItemRequirementsDisplay
 
         void Update()
         {
+#if DEBUG
+            // Run tests when Shift + P is pressed
+            if (Input.GetKey(KeyCode.P) && (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))) Test.RunTests();
+#endif
             // Return if detail is already shown or no current item or text is not active
             if (_isDetailShown || _currentItem == null || !Text.gameObject.activeSelf) return;
 

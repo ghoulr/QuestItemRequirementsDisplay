@@ -1,7 +1,8 @@
-[h2]说明[/h2]
-妈的不小心传错一个文件, 把测试用的xml文件传上来了, 导致原mod一直被卡审查, 先穿一个备份上来, 等原本的审查通过我就改回去, 抱歉抱歉!
-[url=https://steamcommunity.com/sharedfiles/filedetails/?id=3591517959] 原mod页面 [/url]
-[url=https://steamcommunity.com/sharedfiles/filedetails/?id=3595582953] 备份mod页面 [/url]
+[h1]说明[/h1]
+不要订阅这个, 请直接订阅右边这个! [url=https://steamcommunity.com/sharedfiles/filedetails/?id=3591517959] 原mod页面 [/url]
+本页面是防止steam审核mod的时候导致新玩家想订阅但是找不到页面的时候用的备份用页面!
+我会先更新原本的mod再更新这边的mod, 想要最新版的玩家直接订阅原本的mod就行了!
+
 
 [h2] About this mod / mod介绍 [/h2]
 这个mod可以在道具上显示当前你未完成任务, 未解锁的天赋, 未建造的建筑里需要的该道具的数量, 按下shift会显示个别的任务名和数量

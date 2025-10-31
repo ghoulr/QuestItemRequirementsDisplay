@@ -15,13 +15,13 @@
 	<ItemGroup>
 		<Reference Include="$(DuckovPath)\Duckov_Data\Managed\TeamSoda.*" />
 		<Reference Include="$(DuckovPath)\Duckov_Data\Managed\ItemStatsSystem.dll" />
-    <Reference Include="$(DuckovPath)\Duckov_Data\Managed\Unity*" />
+		<Reference Include="$(DuckovPath)\Duckov_Data\Managed\Unity*" />
     <Reference Include="$(DuckovPath)\Duckov_Data\Managed\ParadoxNotion*" />
     <Reference Include="$(DuckovPath)\Duckov_Data\Managed\NodeCanvas*" />
-		<PackageReference Include="Lib.Harmony" Version="2.4.1" />
+    <PackageReference Include="Lib.Harmony" Version="2.4.1" />
 		<Reference Include="$(DuckovPath)\Duckov_Data\Managed\SodaLocalization.dll" />
 	</ItemGroup>
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
-	  <Exec Command="copy /Y &quot;$(TargetPath)&quot; &quot;$(SolutionDir)QuestItemRequirementsDisplay\&quot;" />
+	  <Exec Command="copy /Y &quot;$(TargetPath)&quot; &quot;$(SolutionDir)QuestItemRequirementsDisplay\&quot;&#xD;&#xA;copy /Y &quot;$(TargetPath)&quot; &quot;G:\GAME\steam\steamapps\common\Escape from Duckov\Duckov_Data\Mods\QuestItemRequirementsDisplay&quot;" />
 	</Target>
 </Project>
