@@ -1,4 +1,3 @@
-using Duckov;
 using Duckov.Buildings;
 using Duckov.Quests;
 using Duckov.Quests.Tasks;
@@ -6,13 +5,10 @@ using Duckov.Utilities;
 using HarmonyLib;
 using ItemStatsSystem;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Reflection;
 using Unity.VisualScripting;
-using UnityEngine;
 
 namespace QuestItemRequirementsDisplay
 {
@@ -151,6 +147,8 @@ namespace QuestItemRequirementsDisplay
         /// <returns></returns>
         public static List<RequiredBuilding> GetRequiredBuildings(Item item)
         {
+            // PetHouse is excluded because it's not been implemented yet
+            var excludedBuildingId = "PetHouse";
             var collection = BuildingDataCollection.Instance;
             if (collection == null)
             {
@@ -158,29 +156,15 @@ namespace QuestItemRequirementsDisplay
             }
 
             var result = collection.Infos
+                // Check building's id is not null or empty
                 .Where(info => info.Valid)
+                // Check if the building is not yet placed
                 .Where(info => info.CurrentAmount == 0)
+                // Exclude testing buildings
                 .Where(info => !IsTestingObjectDisplayName(info.DisplayName))
-                .Where(info => !string.Equals(info.id, "PetHouse", StringComparison.Ordinal))
-                .Where(info =>
-                {
-                    if (info.requireBuildings == null || info.requireBuildings.Length == 0)
-                    {
-                        return true;
-                    }
-
-                    if (info.requireBuildings.Contains(info.id))
-                    {
-                        return false;
-                    }
-
-                    if (info.requireBuildings.Contains("PetHouse"))
-                    {
-                        return false;
-                    }
-
-                    return true;
-                })
+                // Exclude the buildings which requireBuildings is set and contains the excludedBuildingId
+                // Pass the buildings that do not have requireBuildings set
+                .Where(info => info.requireBuildings == null || info.requireBuildings.Length == 0 || !info.requireBuildings.Contains(excludedBuildingId))
                 .SelectMany(info => info.cost.items
                     .Where(itemEntry => itemEntry.id == item.TypeID)
                     .Select(itemEntry => new RequiredBuilding
