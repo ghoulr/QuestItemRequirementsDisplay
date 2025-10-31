@@ -24,6 +24,15 @@ namespace QuestItemRequirementsDisplay
         private static readonly Dictionary<int, IList<int>> QuestParentsById = new Dictionary<int, IList<int>>();
         private static readonly Dictionary<int, List<int>> QuestChildrenById = new Dictionary<int, List<int>>();
 
+        // Trees to exclude from perk calculations:
+        // - "Blueprint": weapon/blueprint unlocks; not considered character perk progression
+        // - "PerkTree_Farming": farming-related tree currently out of scope
+        private static readonly HashSet<string> DeniedPerkTreeIds = new HashSet<string>(StringComparer.Ordinal)
+        {
+            "Blueprint",
+            "PerkTree_Farming",
+        };
+
         public static List<Quest> TotalQuests = InitTotalQuests();
 
         /// <summary>
@@ -90,21 +99,19 @@ namespace QuestItemRequirementsDisplay
         static public List<RequiredPerk> GetRequiredPerkEntries(Item item)
         {
             var requiredPerkEntries = PerkTreeManager.Instance.perkTrees
-                    .SelectMany(perkTree => perkTree.Perks
-                        // Only consider locked perks
-                        .Where(perk => !perk.Unlocked)
-                        // Get required items for each perk
-                        .SelectMany(perk => perk.Requirement.cost.items
-                            // Get entries that match the item type ID
-                            .Where(itemEntry => itemEntry.id == item.TypeID)
-                            .Select(itemEntry => new RequiredPerk
-                            {
-                                Amount = itemEntry.amount,
-                                PerkTreeName = perkTree.DisplayName,
-                                PerkName = perk.DisplayName,
-                            })
-                        )
-                    ).ToList();
+                .Where(perkTree => !DeniedPerkTreeIds.Contains(perkTree.ID))
+                .SelectMany(perkTree => perkTree.Perks
+                    .Where(perk => perk != null && !perk.Unlocked && perk.Requirement != null && perk.Requirement.cost.items != null)
+                    .SelectMany(perk => perk.Requirement.cost.items
+                        .Where(itemEntry => itemEntry.id == item.TypeID)
+                        .Select(itemEntry => new RequiredPerk
+                        {
+                            Amount = itemEntry.amount,
+                            PerkTreeName = perkTree.DisplayName,
+                            PerkName = perk.DisplayName,
+                        })
+                    )
+                ).ToList();
             return requiredPerkEntries;
         }
 
