@@ -17,12 +17,12 @@ namespace QuestItemRequirementsDisplay
         public readonly string ModName = "QuestItemRequirementsDisplay";
         public readonly string Version = "0.5";
 
-        private Harmony harmony;
+        private Harmony? harmony;
 
-        private Item _currentItem = null;
+        private Item? _currentItem = null;
         private bool _isDetailShown = false;
 
-        TextMeshProUGUI _text = null;
+        TextMeshProUGUI? _text = null;
         TextMeshProUGUI Text
         {
             get
@@ -31,7 +31,7 @@ namespace QuestItemRequirementsDisplay
                 {
                     _text = Instantiate(GameplayDataSettings.UIStyle.TemplateTextUGUI);
                 }
-                return _text;
+                return _text!;
             }
         }
         void Awake()
