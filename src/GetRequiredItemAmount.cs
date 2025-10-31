@@ -41,7 +41,7 @@ namespace QuestItemRequirementsDisplay
             foreach (var quest in questCollection)
             {
                 var parentIds = GetParentQuestIds(quest.ID);
-                // First exclude quests with a high level requirement (uminplemented quests)
+                // First exclude quests with a high level requirement (unimplemented quests)
                 if (quest.RequireLevel >= unimplementedLevelRequirement)
                 {
                     excludedQuests.Add(quest.ID);
