@@ -45,6 +45,7 @@ namespace QuestItemRequirementsDisplay
         }
         void OnEnable()
         {
+            GetRequiredItemAmount.SubscribeRequirementEvents();
             ItemHoveringUI.onSetupItem += OnSetupItemHoveringUI;
             ItemHoveringUI.onSetupMeta += OnSetupMeta;
             harmony = new Harmony("DisplayRequiredItemCount");
@@ -54,6 +55,7 @@ namespace QuestItemRequirementsDisplay
         {
             ItemHoveringUI.onSetupItem -= OnSetupItemHoveringUI;
             ItemHoveringUI.onSetupMeta -= OnSetupMeta;
+            GetRequiredItemAmount.UnsubscribeRequirementEvents();
         }
         private void OnSetupMeta(ItemHoveringUI uI, ItemMetaData data)
         {
@@ -194,16 +196,17 @@ namespace QuestItemRequirementsDisplay
             var text = string.Empty;
             var amount = 0;
             var requiredSubmitItems = GetRequiredItemAmount.GetRequiredSubmitItems(item);
-            var requiredAmountRef = AccessTools.FieldRefAccess<int>(typeof(SubmitItems), "requiredAmount");
 
             if (requiredSubmitItems.Count == 0) return (text, amount);
 
             text += LocalizedText.Get(MethodBase.GetCurrentMethod().Name);
-            foreach (var submitItem in requiredSubmitItems)
+            foreach (var submitRequirement in requiredSubmitItems)
             {
-                var reqAmount = requiredAmountRef(submitItem);
-                text += $"\n\t{reqAmount}  -  {submitItem.Master.DisplayName}";
-                amount += reqAmount;
+                var questName = submitRequirement.Task != null && submitRequirement.Task.Master != null
+                    ? submitRequirement.Task.Master.DisplayName
+                    : submitRequirement.QuestName;
+                text += $"\n\t{submitRequirement.Remaining}  -  {questName}";
+                amount += submitRequirement.Remaining;
             }
 
             return (text, amount);
@@ -222,10 +225,13 @@ namespace QuestItemRequirementsDisplay
             if (requiredUseItems.Count == 0) return (text, amount);
 
             text += LocalizedText.Get(MethodBase.GetCurrentMethod().Name);
-            foreach (var kv in requiredUseItems)
+            foreach (var useRequirement in requiredUseItems)
             {
-                text += $"\n\t{kv.Value}  -  {kv.Key.Master.DisplayName}";
-                amount += (int)kv.Value;
+                var questName = useRequirement.Task != null && useRequirement.Task.Master != null
+                    ? useRequirement.Task.Master.DisplayName
+                    : useRequirement.QuestName;
+                text += $"\n\t{useRequirement.Remaining}  -  {questName}";
+                amount += useRequirement.Remaining;
             }
 
             return (text, amount);
