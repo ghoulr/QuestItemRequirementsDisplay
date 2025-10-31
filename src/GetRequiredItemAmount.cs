@@ -7,19 +7,12 @@ using ItemStatsSystem;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using Unity.VisualScripting;
 
 namespace QuestItemRequirementsDisplay
 {
     static public class GetRequiredItemAmount
     {
-        private static readonly HashSet<string> LoggedQuestLabels = new HashSet<string>();
-        private static readonly object LogSync = new object();
-
-        private static readonly Dictionary<int, IList<int>> QuestParentsById = new Dictionary<int, IList<int>>();
-        private static readonly Dictionary<int, List<int>> QuestChildrenById = new Dictionary<int, List<int>>();
-
         // Trees to exclude from perk calculations:
         // - "Blueprint": weapon/blueprint unlocks; not considered character perk progression
         // - "PerkTree_Farming": farming-related tree currently out of scope
@@ -32,26 +25,76 @@ namespace QuestItemRequirementsDisplay
         public static List<Quest> TotalQuests = InitTotalQuests();
 
         /// <summary>
-        /// Initialize the total quests list, excluding testing quests.
+        /// Initialize the total quests list, excluding unimplemented quests and their children, as well as testing quests.
         /// </summary>
         /// <returns></returns>
         private static List<Quest> InitTotalQuests()
         {
-            var allQuests = GameplayDataSettings.QuestCollection
-                .ConvertTo<List<Quest>>();
+            var unimplementedLevelRequirement = 999;
+            var questCollection = GameplayDataSettings.QuestCollection
+                .ConvertTo<List<Quest>>()
+                .Where(q => q != null);
 
-            RebuildQuestGraphCache(allQuests);
+            // Build a parent-to-children mapping
+            var parentToChildren = new Dictionary<int, List<int>>();
+            var excludedQuests = new HashSet<int>();
+            foreach (var quest in questCollection)
+            {
+                var parentIds = GetParentQuestIds(quest.ID);
+                // First exclude quests with a high level requirement (uminplemented quests)
+                if (quest.RequireLevel >= unimplementedLevelRequirement)
+                {
+                    excludedQuests.Add(quest.ID);
+                }
+                // Build parent-to-children mapping
+                foreach (var parentId in parentIds)
+                {
+                    if (!parentToChildren.TryGetValue(parentId, out var children))
+                        parentToChildren[parentId] = children = new List<int>();
+                    children.Add(quest.ID);
+                }
+            }
 
+            // Recursive function to exclude all children of a given quest
+            void ExcludeChildren(int questId)
+            {
+                if (parentToChildren.TryGetValue(questId, out var children))
+                {
+                    foreach (var childId in children)
+                    {
+                        if (excludedQuests.Add(childId)) ExcludeChildren(childId);
+                    }
+                }
+            }
 
-            var excludedByGraph = ComputeExcludedIdsByRootRule(allQuests);
+            // Recursively exclude all children of excluded quests
+            foreach (var questId in excludedQuests.ToList())
+            {
+                ExcludeChildren(questId);
+            }
 
-            var graphFiltered = allQuests
-                .Where(q => q != null && !excludedByGraph.Contains(q.ID))
+            var filteredQuests = questCollection
+                // Filter out excluded quests
+                .Where(q => !excludedQuests.Contains(q.ID))
+                // Filter out testing quests
+                .Where(q => !IsTestingObjectDisplayName(q.DisplayName))
                 .ToList();
 
-            return graphFiltered;
+            return filteredQuests;
         }
 
+        /// <summary>
+        /// Get the parent quest IDs for the specified quest ID.
+        /// </summary>
+        /// <param name="questId"></param>
+        /// <returns></returns>
+        private static List<int> GetParentQuestIds(int questId)
+        {
+            var questRelation = GameplayDataSettings.QuestRelation;
+            if (questRelation == null) return new List<int>();
+            var parentQuestIds = questRelation.GetRequiredIDs(questId);
+            return parentQuestIds;
+        }
 
         /// <summary>
         /// Check if the object's display name is a testing name (starts and ends with '*')
@@ -207,137 +250,6 @@ namespace QuestItemRequirementsDisplay
                 )
                 .ToDictionary(x => x.useItem, x => x.requireAmount);
             return requiredUseItems;
-        }
-
-        private static object? GetQuestRelation()
-        {
-            var relationProperty = typeof(GameplayDataSettings).GetProperty("QuestRelation", BindingFlags.Public | BindingFlags.Static);
-            return relationProperty?.GetValue(null);
-        }
-
-        private static IList<int> GetParentIds(int questId)
-        {
-            var relation = GetQuestRelation();
-            if (relation == null) return new List<int>();
-            var getRequiredIdsMethod = relation.GetType().GetMethod("GetRequiredIDs");
-            var parentsObj = getRequiredIdsMethod?.Invoke(relation, new object[] { questId }) as System.Collections.IEnumerable;
-            if (parentsObj == null) return new List<int>();
-            return parentsObj.Cast<object>().Select(o => Convert.ToInt32(o)).ToList();
-        }
-
-        private static IList<int> GetChildrenIds(int questId)
-        {
-            if (QuestChildrenById.TryGetValue(questId, out var children) && children != null)
-            {
-                return new List<int>(children);
-            }
-            return new List<int>();
-        }
-
-        private static HashSet<int> ComputeExcludedIdsByRootRule(IEnumerable<Quest> quests)
-        {
-            RebuildQuestGraphCache(quests);
-
-            var excluded = new HashSet<int>();
-
-            foreach (var quest in quests)
-            {
-                if (quest == null)
-                {
-                    continue;
-                }
-
-                var parents = QuestParentsById.TryGetValue(quest.ID, out var cachedParents) ? cachedParents : new List<int>();
-                var isRoot = parents == null || parents.Count == 0;
-                if (!isRoot) continue;
-
-                if (quest.RequireLevel >= 100)
-                {
-                    var stack = new Stack<int>();
-                    stack.Push(quest.ID);
-
-                    while (stack.Count > 0)
-                    {
-                        var cur = stack.Pop();
-                        if (!excluded.Add(cur))
-                        {
-                            continue;
-                        }
-
-                        if (!QuestChildrenById.TryGetValue(cur, out var children) || children == null)
-                        {
-                            continue;
-                        }
-
-                        foreach (var child in children)
-                        {
-                            if (!excluded.Contains(child))
-                            {
-                                stack.Push(child);
-                            }
-                        }
-                    }
-                }
-            }
-
-            return excluded;
-        }
-
-        private static void RebuildQuestGraphCache(IEnumerable<Quest> quests)
-        {
-            QuestParentsById.Clear();
-            QuestChildrenById.Clear();
-
-            foreach (var quest in quests)
-            {
-                if (quest == null)
-                {
-                    continue;
-                }
-
-                var parents = GetParentIds(quest.ID);
-                QuestParentsById[quest.ID] = parents;
-
-                foreach (var parent in parents)
-                {
-                    if (!QuestChildrenById.TryGetValue(parent, out var children))
-                    {
-                        children = new List<int>();
-                        QuestChildrenById[parent] = children;
-                    }
-
-                    if (!children.Contains(quest.ID))
-                    {
-                        children.Add(quest.ID);
-                    }
-                }
-            }
-        }
-
-        private static string FormatTaskSummary(Duckov.Quests.Task task)
-        {
-            if (task == null)
-            {
-                return "<null>";
-            }
-
-            var typeName = task.GetType().Name;
-
-            if (task is SubmitItems submitItems)
-            {
-                var requiredAmountRef = AccessTools.FieldRefAccess<int>(typeof(SubmitItems), "requiredAmount");
-                var submittedAmountRef = AccessTools.FieldRefAccess<int>(typeof(SubmitItems), "submittedAmount");
-                return $"{typeName}(ItemTypeID={submitItems.ItemTypeID}, RequiredAmount={requiredAmountRef(submitItems)}, SubmittedAmount={submittedAmountRef(submitItems)})";
-            }
-
-            if (task is QuestTask_UseItem questTaskUseItem)
-            {
-                var itemTypeIDRef = AccessTools.FieldRefAccess<int>(typeof(QuestTask_UseItem), "itemTypeID");
-                var requireAmountRef = AccessTools.FieldRefAccess<int>(typeof(QuestTask_UseItem), "requireAmount");
-                return $"{typeName}(ItemTypeID={itemTypeIDRef(questTaskUseItem)}, RequiredAmount={requireAmountRef(questTaskUseItem)})";
-            }
-
-            return typeName;
         }
     }
 }
