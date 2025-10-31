@@ -1,13 +1,14 @@
-﻿using Duckov.Quests;
+using Duckov.Buildings;
+using Duckov.Quests;
 using Duckov.Quests.Tasks;
 using Duckov.Utilities;
-using Duckov.Buildings;
+using HarmonyLib;
 using ItemStatsSystem;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using HarmonyLib;
 using Unity.VisualScripting;
+using UnityEngine;
 
 namespace QuestItemRequirementsDisplay
 {
@@ -28,6 +29,7 @@ namespace QuestItemRequirementsDisplay
 
             return totalQuests;
         }
+
 
         /// <summary>
         /// Check if the object's display name is a testing name (starts and ends with '*')
@@ -125,17 +127,46 @@ namespace QuestItemRequirementsDisplay
         /// <returns></returns>
         public static List<RequiredBuilding> GetRequiredBuildings(Item item)
         {
-            return BuildingDataCollection.Instance.Infos
-                // Only consider buildings that are not yet placed
-                .Where(info => info.CurrentAmount == 0 && !IsTestingObjectDisplayName(info.DisplayName))
+            var collection = BuildingDataCollection.Instance;
+            if (collection == null)
+            {
+                return new List<RequiredBuilding>();
+            }
+
+            var result = collection.Infos
+                .Where(info => info.Valid)
+                .Where(info => info.CurrentAmount == 0)
+                .Where(info => !IsTestingObjectDisplayName(info.DisplayName))
+                .Where(info => !string.Equals(info.id, "PetHouse", StringComparison.Ordinal))
+                .Where(info =>
+                {
+                    if (info.requireBuildings == null || info.requireBuildings.Length == 0)
+                    {
+                        return true;
+                    }
+
+                    if (info.requireBuildings.Contains(info.id))
+                    {
+                        return false;
+                    }
+
+                    if (info.requireBuildings.Contains("PetHouse"))
+                    {
+                        return false;
+                    }
+
+                    return true;
+                })
                 .SelectMany(info => info.cost.items
                     .Where(itemEntry => itemEntry.id == item.TypeID)
                     .Select(itemEntry => new RequiredBuilding
                     {
                         Amount = itemEntry.amount,
                         BuildingName = info.DisplayName
-                    })
-                ).ToList();
+                    }))
+                .ToList();
+
+            return result;
         }
 
         /// <summary>
